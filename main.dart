@@ -1,98 +1,80 @@
-import 'dart:io';
+import 'package:flutter/material.dart'; 
+import 'package:reviews_slider/reviews_slider.dart'; 
 
-import 'package:android_alarm_manager/android_alarm_manager.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:food_rating_app/common/navigation.dart';
-import 'package:food_rating_app/data/api/api_service.dart';
-import 'package:food_rating_app/data/database/database_helper.dart';
-import 'package:food_rating_app/modules/providers/database_provider.dart';
-import 'package:food_rating_app/modules/providers/restaurant_provider.dart';
-import 'package:food_rating_app/modules/providers/scheduling_provider.dart';
-import 'package:food_rating_app/modules/screens/home_screen.dart';
-import 'package:food_rating_app/modules/screens/preferences/preferences_helper.dart';
-import 'package:food_rating_app/modules/providers/preferences_provider.dart';
-import 'package:food_rating_app/routes.dart';
-import 'package:food_rating_app/utilities/background_service.dart';
-import 'package:food_rating_app/utilities/notification_helper.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+void main() { 
+	runApp(const myApp());
+} 
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+class myApp extends StatelessWidget { 
+	const myApp({ 
+		super.key 
+	}); 
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final NotificationHelper _notificationHelper = NotificationHelper();
-  final BackgroundService _service = BackgroundService();
+	@override 
+	Widget build(BuildContext context) { 
+		return MaterialApp( 
+			title: 'Review Slider', 
+			theme: ThemeData( 
+				primarySwatch: Colors.blue, 
+			), 
+			home: const MyHomePage(title: 'Restaurant Review'), 
+		); 
+	} 
+} 
 
-  _service.initializeIsolate();
+class MyHomePage extends StatefulWidget { 
+	const MyHomePage({ 
+		super.key, 
+		required this.title 
+	}); 
 
-  if (Platform.isAndroid) {
-    await AndroidAlarmManager.initialize();
-  }
+	final String title; 
 
-  await _notificationHelper.initNotifications(flutterLocalNotificationsPlugin);
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider<ListProvider>(
-          create: (_) => ListProvider(
-            apiService: ApiService(),
-          ),
-        ),
-        ChangeNotifierProvider<DetailProvider>(
-          create: (_) => DetailProvider(
-            apiService: ApiService(),
-          ),
-        ),
-        ChangeNotifierProvider<SearchProvider>(
-          create: (_) => SearchProvider(
-            apiService: ApiService(),
-          ),
-        ),
-        ChangeNotifierProvider<ReviewProvider>(
-          create: (_) => ReviewProvider(
-            apiService: ApiService(),
-          ),
-        ),
-        ChangeNotifierProvider<DatabaseProvider>(
-          create: (_) => DatabaseProvider(
-            databaseHelper: DatabaseHelper(),
-          ),
-        ),
-        ChangeNotifierProvider<PreferencesProvider>(
-          create: (_) => PreferencesProvider(
-            preferencesHelper: PreferencesHelper(
-              sharedPreferences: SharedPreferences.getInstance(),
-            ),
-          ),
-        ),
-        ChangeNotifierProvider<SchedulingProvider>(
-          create: (_) => SchedulingProvider(),
-        ),
-      ],
-      child: const FoodRatingApp(),
-    ),
-  );
-}
+	@override 
+	State < MyHomePage > createState() => _MyHomePageState(); 
+} 
 
-class FoodRatingApp extends StatelessWidget {
-  const FoodRatingApp({Key? key}) : super(key: key);
+class _MyHomePageState extends State < MyHomePage > { 
+	int _counter = 0; 
 
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<PreferencesProvider>(
-      builder: (context, provider, _) {
-        return MaterialApp(
-          title: 'Food Rating App',
-          debugShowCheckedModeBanner: false,
-          theme: provider.themeData,
-          initialRoute: HomeScreen.routeName,
-          navigatorKey: navigatorKey,
-          routes: allRoute(context),
-        );
-      },
-    );
-  }
+	void _incrementCounter() { 
+		setState(() { 
+			_counter++; 
+		}); 
+	} 
+ 
+	List < String > list = ['Terrible', 'Bad', 'Okay', 'Good', 'Great']; 
+	
+	
+String selected_valueoftxt = ""; 
+
+	@override 
+	Widget build(BuildContext context) { 
+		return Scaffold( 
+			appBar: AppBar( 
+				title: Text(widget.title), 
+			), 
+			body: Column( 
+				mainAxisAlignment: MainAxisAlignment.center, 
+				children: [ 
+					Center( 
+						child: ReviewSlider( 
+							initialValue: 3, 
+							options: list, 
+							onChange: (int value) { 
+								selected_valueoftxt = list[value]; 
+								setState(() { 
+								}); 
+							} 
+						), 
+					), 
+				// Now we implemented text and in this text our selected face text value show 
+					Text(selected_valueoftxt, style: TextStyle( 
+						color: Colors.black, 
+						fontSize: 20, 
+					), ) 
+				], 
+			), 
+		);
+	} 
 }
